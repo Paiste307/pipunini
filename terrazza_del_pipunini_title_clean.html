@@ -1,0 +1,189 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Terrazza del Pipunini</title>
+  <style>
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Oxygen, Ubuntu, sans-serif;
+      margin: 0;
+      padding: 1rem;
+      background: #fafafa;
+      color: #333;
+    }
+    h1 {
+      text-align: center;
+      margin-bottom: 1.5rem;
+    }
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      background: white;
+      box-shadow: 0 2px 6px rgba(0,0,0,0.1);
+    }
+    th, td {
+      padding: 0.75rem;
+      text-align: left;
+      border-bottom: 1px solid #eee;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+    th {
+      background: #f2f2f2;
+      font-weight: bold;
+      cursor: pointer;
+      user-select: none;
+    }
+    th.sorted-asc::after {
+      content: " 🔼";
+    }
+    th.sorted-desc::after {
+      content: " 🔽";
+    }
+
+    .water-high { background-color: #fdd; }
+    .water-medium { background-color: #ffe9c6; }
+    .water-low { background-color: #e3f9e5; }
+
+    .light-sun { background-color: #fff3cd; }
+    .light-half { background-color: #e0f7fa; }
+
+    .fertilizer-universal { background-color: #ede7f6; }
+    .fertilizer-mediterranean { background-color: #fff8e1; }
+    .fertilizer-obst { background-color: #ffe0e0; }
+    .fertilizer-hortensie { background-color: #fce4ec; }
+
+    .winter-yes { background-color: #d0f0c0; }
+    .winter-no { background-color: #f8d7da; }
+    .winter-moderate { background-color: #fff3cd; }
+
+    .cut-regular { background-color: #e1f5fe; }
+    .cut-spring { background-color: #e8f5e9; }
+    .cut-autumn { background-color: #f3e5f5; }
+    .cut-winter { background-color: #ede7f6; }
+    .cut-need { background-color: #fffde7; }
+  </style>
+</head>
+<body>
+  <h1>Terrazza del Pipunini ☀️</h1>
+  <table id="pflanzenTable">
+    <thead>
+      <tr>
+        <th onclick="sortTable(0)">🪴 Pflanze</th>
+        <th onclick="sortTable(1)">💦 Gießen</th>
+        <th onclick="sortTable(2)">☀️ Licht</th>
+        <th onclick="sortTable(3)">🧪 Dünger</th>
+        <th onclick="sortTable(4)">❄️ Winterhart</th>
+        <th onclick="sortTable(5)">✂️ Rückschnitt</th>
+      </tr>
+    </thead>
+    <tbody></tbody>
+  </table>
+
+  <script>
+    const data = [
+      ["🥑 Avocado", "💧💧 2x/Woche", "🌤 Halbschatten", "♻ Universal", "❌ Nein", "🔁 Regelm."],
+      ["🌿 Basilikum", "💦💦 Täglich", "🌤 Halbschatten", "🍋 Mediterran", "❌ Nein", "🔁 Regelm."],
+      ["🍊 Calamondinorange", "💧💧 2x/Woche", "☀️ Sonne", "🍋 Mediterran", "❌ Nein", "🌱 Frühjahr"],
+      ["💜 Echter Lavendel", "💧 1x/Woche", "☀️ Sonne", "🍋 Mediterran", "⚠️ Mäßig", "🔪 Nach Bedarf"],
+      ["🌿 Eukalyptus", "💧💧 2x/Woche", "☀️ Sonne", "🍋 Mediterran", "❌ Nein", "🌱 Frühjahr"],
+      ["🥝 Feige", "💧💧 2x/Woche", "☀️ Sonne", "🍑 Obst", "⚠️ Mäßig", "🔪 Nach Bedarf"],
+      ["🍁 Goldahorn", "💧💧 2x/Woche", "🌤 Halbschatten", "♻ Universal", "✅ Ja", "🔪 Nach Bedarf"],
+      ["🌳 Harlekin Weide", "💧💧 2x/Woche", "🌤 Halbschatten", "♻ Universal", "✅ Ja", "🌱 Frühjahr"],
+      ["🌺 Hibiskus", "💧💧 2x/Woche", "🌤 Halbschatten", "♻ Universal", "❌ Nein", "🌱 Frühjahr"],
+      ["🌸 Hortensien", "💦💦 Täglich", "🌤 Halbschatten", "🌺 Hortensie", "✅ Ja", "🌱 Frühjahr"],
+      ["🌼 Jasmin (echter)", "💧💧 2x/Woche", "🌤 Halbschatten", "♻ Universal", "⚠️ Mäßig", "🌱 Frühjahr"],
+      ["🌱 Minze", "💦 Jeden 2. Tag", "🌤 Halbschatten", "🍋 Mediterran", "✅ Ja", "🔁 Regelm."],
+      ["🌿 Muskatellersalbei", "💧💧 2x/Woche", "☀️ Sonne", "🍋 Mediterran", "⚠️ Mäßig", "🍂 Herbst"],
+      ["🍑 Nektarinenbaum", "💧💧 2x/Woche", "☀️ Sonne", "🍑 Obst", "❌ Nein", "❄️ Winter"],
+      ["🌸 Oleander", "💧💧 2x/Woche", "☀️ Sonne", "🍋 Mediterran", "❌ Nein", "🔪 Nach Bedarf"],
+      ["🌿 Olivenbaum", "💧💧 2x/Woche", "☀️ Sonne", "🍋 Mediterran", "❌ Nein", "🌱 Frühjahr"],
+      ["🌾 Pampasgras", "💧💧 2x/Woche", "☀️ Sonne", "♻ Universal", "✅ Ja", "🌱 Frühjahr"],
+      ["🌹 Rose", "💧💧 2x/Woche", "☀️ Sonne", "♻ Universal", "✅ Ja", "🌱 Frühjahr"],
+      ["🌿 Rosmarin", "💧💧 2x/Woche", "☀️ Sonne", "🍋 Mediterran", "⚠️ Mäßig", "🌱 Frühjahr"],
+      ["🌱 Schnittlauch", "💦 Jeden 2. Tag", "☀️ Sonne", "🍋 Mediterran", "✅ Ja", "🔁 Regelm."],
+      ["🌼 Sternjasmin", "💧💧 2x/Woche", "🌤 Halbschatten", "♻ Universal", "⚠️ Mäßig", "🌱 Frühjahr"],
+      ["🍇 Weinrebe", "💧💧 2x/Woche", "☀️ Sonne", "🍑 Obst", "✅ Ja", "🔪 Nach Bedarf"],
+      ["🍋 Zitrone", "💧💧 2x/Woche", "☀️ Sonne", "🍋 Mediterran", "❌ Nein", "🌱 Frühjahr"]
+    ];
+
+    const tbody = document.querySelector("#pflanzenTable tbody");
+    const table = document.getElementById("pflanzenTable");
+
+    function applyColor(cell, columnIndex) {
+      const text = cell.textContent;
+      if (columnIndex === 1) {
+        if (text.includes("Täglich")) cell.className = "water-high";
+        else if (text.includes("Jeden 2")) cell.className = "water-medium";
+        else cell.className = "water-low";
+      } else if (columnIndex === 2) {
+        cell.className = text.includes("Halbschatten") ? "light-half" : "light-sun";
+      } else if (columnIndex === 3) {
+        if (text.includes("Universal")) cell.className = "fertilizer-universal";
+        else if (text.includes("Mediterran")) cell.className = "fertilizer-mediterranean";
+        else if (text.includes("Obst")) cell.className = "fertilizer-obst";
+        else if (text.includes("Hortensie")) cell.className = "fertilizer-hortensie";
+      } else if (columnIndex === 4) {
+        if (text.includes("Ja")) cell.className = "winter-yes";
+        else if (text.includes("Nein")) cell.className = "winter-no";
+        else cell.className = "winter-moderate";
+      } else if (columnIndex === 5) {
+        if (text.includes("Regelm")) cell.className = "cut-regular";
+        else if (text.includes("Frühjahr")) cell.className = "cut-spring";
+        else if (text.includes("Herbst")) cell.className = "cut-autumn";
+        else if (text.includes("Winter")) cell.className = "cut-winter";
+        else cell.className = "cut-need";
+      }
+    }
+
+    data.forEach(row => {
+      const tr = document.createElement("tr");
+      row.forEach((val, i) => {
+        const td = document.createElement("td");
+        td.textContent = val;
+        applyColor(td, i);
+        tr.appendChild(td);
+      });
+      tbody.appendChild(tr);
+    });
+
+    function sortTable(col) {
+      const rows = Array.from(tbody.querySelectorAll("tr"));
+      const dir = table.dataset.sortDir === "asc" ? "desc" : "asc";
+      table.dataset.sortDir = dir;
+      table.dataset.sortCol = col;
+
+      rows.sort((a, b) => {
+        const A = a.children[col].textContent;
+        const B = b.children[col].textContent;
+
+        if (col === 1) {
+          const order = [
+            "💦💦 Täglich",
+            "💦 Jeden 2. Tag",
+            "💧💧 2x/Woche",
+            "💧 1x/Woche"
+          ];
+          const valA = order.indexOf(A);
+          const valB = order.indexOf(B);
+          return dir === "asc" ? valA - valB : valB - valA;
+        }
+
+        const cleanA = A.replace(/[^a-zA-ZäöüÄÖÜß]/g, '').toLowerCase();
+        const cleanB = B.replace(/[^a-zA-ZäöüÄÖÜß]/g, '').toLowerCase();
+        return dir === "asc" ? cleanA.localeCompare(cleanB) : cleanB.localeCompare(cleanA);
+      });
+
+      tbody.innerHTML = "";
+      rows.forEach(r => tbody.appendChild(r));
+
+      table.querySelectorAll("th").forEach((th, i) => {
+        th.classList.remove("sorted-asc", "sorted-desc");
+        if (i === col) th.classList.add(dir === "asc" ? "sorted-asc" : "sorted-desc");
+      });
+    }
+  </script>
+</body>
+</html>
