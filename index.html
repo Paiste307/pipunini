@@ -1,192 +1,193 @@
 <!DOCTYPE html>
 <html lang="de">
 <head>
-  <link rel="apple-touch-icon" href="icon.png">
-  <link rel="icon" href="icon.png" type="image/png">
-  <link rel="manifest" href="manifest.json">
   <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Terrazza del Pipunini</title>
   <style>
+    @import url('https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@100;800&display=swap');
+
     body {
-      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Oxygen, Ubuntu, sans-serif;
+      font-family: 'JetBrains Mono', monospace;
       margin: 0;
-      padding: 1rem;
-      background: #fafafa;
-      color: #333;
+      background: #F2EADB;
+      color: F2EADB;
     }
     h1 {
       text-align: center;
-      margin-bottom: 1.5rem;
+      margin: 1rem 0;
+      font-size: 1.5rem;
+      color: 2A412D;
     }
-    table {
-      width: 100%;
-      border-collapse: collapse;
-      background: white;
-      box-shadow: 0 2px 6px rgba(0,0,0,0.1);
+    .menu {
+      display: flex;
+      justify-content: center;
+      gap: 1rem;
+      flex-wrap: wrap;
+      padding: 1rem;
+      background: #ffffff;
+      box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+      border-radius: 0 0 20px 20px;
     }
-    th, td {
-      padding: 0.75rem;
-      text-align: left;
-      border-bottom: 1px solid #eee;
-      white-space: nowrap;
-      overflow: hidden;
-      text-overflow: ellipsis;
-    }
-    th {
-      background: #f2f2f2;
-      font-weight: bold;
+    .menu button {
+      background: none;
+      border: none;
+      font-size: 1.5rem;
       cursor: pointer;
-      user-select: none;
+      transition: transform 0.2s, color 0.2s;
+      color: #4caf50;
     }
-    th.sorted-asc::after {
-      content: " 🔼";
+    .menu button:hover {
+      transform: scale(1.3);
+      color: #2e7d32;
     }
-    th.sorted-desc::after {
-      content: " 🔽";
+    .separator {
+      font-size: 1.5rem;
+      color: #ccc;
     }
+    .cards {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 1rem;
+      padding: 1rem;
+    }
+    .card {
+      width: 90%;
+      max-width: 700px;
+      height: auto;
+      border-radius: 40px;
+      overflow: hidden;
+      position: relative;
+      display: flex;
+      align-items: center;
+      justify-content: flex-start;
+      background-size: cover;
+      background-position: top right;
+      background-color: #ccc;
+      padding: 2rem;
+      box-sizing: border-box;
 
-    .water-high { background-color: #fdd; }
-    .water-medium { background-color: #ffe9c6; }
-    .water-low { background-color: #e3f9e5; }
-
-    .light-sun { background-color: #fff3cd; }
-    .light-half { background-color: #e0f7fa; }
-
-    .fertilizer-universal { background-color: #ede7f6; }
-    .fertilizer-mediterranean { background-color: #fff8e1; }
-    .fertilizer-obst { background-color: #ffe0e0; }
-    .fertilizer-hortensie { background-color: #fce4ec; }
-
-    .winter-yes { background-color: #d0f0c0; }
-    .winter-no { background-color: #f8d7da; }
-    .winter-moderate { background-color: #fff3cd; }
-
-    .cut-regular { background-color: #e1f5fe; }
-    .cut-spring { background-color: #e8f5e9; }
-    .cut-autumn { background-color: #f3e5f5; }
-    .cut-winter { background-color: #ede7f6; }
-    .cut-need { background-color: #fffde7; }
+    }
+    .text-overlay {
+      position: relative;
+      display: flex;
+      flex-direction: column;
+      background: rgba(0, 0, 0, 0.4);
+      padding: 1rem;
+      border-radius: 20px;
+    }
+    .plant-name {
+      font-weight: 800;
+      font-size: 1.5rem;
+      color: white;
+    }
+    .plant-attribute {
+      font-weight: 100;
+      font-size: 1.0rem;
+      color: white;
+      margin-top: 0.4rem;
+      letter-spacing: 0.05rem;
+    }
   </style>
 </head>
 <body>
-  <h1>Terrazza del Pipunini ☀️</h1>
-  <table id="pflanzenTable">
-    <thead>
-      <tr>
-        <th onclick="sortTable(0)">🪴 Pflanze</th>
-        <th onclick="sortTable(1)">💦 Gießen</th>
-        <th onclick="sortTable(2)">☀️ Licht</th>
-        <th onclick="sortTable(3)">🧪 Dünger</th>
-        <th onclick="sortTable(4)">❄️ Winterhart</th>
-        <th onclick="sortTable(5)">✂️ Rückschnitt</th>
-      </tr>
-    </thead>
-    <tbody></tbody>
-  </table>
+  <h1>Terrazza del Pipunini</h1>
+  <div class="menu">
+    <button onclick="toggleSort(1)">💦</button>
+    <button onclick="toggleSort(2)">☀️</button>
+    <button onclick="toggleSort(3)">🧪</button>
+    <button onclick="toggleSort(4)">❄️</button>
+    <button onclick="toggleSort(5)">✂️</button>
+    <span class="separator">|</span>
+    <button onclick="toggleSort(0)">🪴</button>
+  </div>
+  <div class="cards" id="plantCards"></div>
 
   <script>
-    const data = [
-      ["🥑 Avocado", "💧💧 2x/Woche", "🌤 Halbschatten", "♻ Universal", "❌ Nein", "🔁 Regelm."],
-      ["🌿 Basilikum", "💦💦 Täglich", "🌤 Halbschatten", "🍋 Mediterran", "❌ Nein", "🔁 Regelm."],
-      ["🍊 Calamondinorange", "💧💧 2x/Woche", "☀️ Sonne", "🍋 Mediterran", "❌ Nein", "🌱 Frühjahr"],
-      ["💜 Echter Lavendel", "💧 1x/Woche", "☀️ Sonne", "🍋 Mediterran", "⚠️ Mäßig", "🔪 Nach Bedarf"],
-      ["🌿 Eukalyptus", "💧💧 2x/Woche", "☀️ Sonne", "🍋 Mediterran", "❌ Nein", "🌱 Frühjahr"],
-      ["🥝 Feige", "💧💧 2x/Woche", "☀️ Sonne", "🍑 Obst", "⚠️ Mäßig", "🔪 Nach Bedarf"],
-      ["🍁 Goldahorn", "💧💧 2x/Woche", "🌤 Halbschatten", "♻ Universal", "✅ Ja", "🔪 Nach Bedarf"],
-      ["🌳 Harlekin Weide", "💧💧 2x/Woche", "🌤 Halbschatten", "♻ Universal", "✅ Ja", "🌱 Frühjahr"],
-      ["🌺 Hibiskus", "💧💧 2x/Woche", "🌤 Halbschatten", "♻ Universal", "❌ Nein", "🌱 Frühjahr"],
-      ["🌸 Hortensien", "💦💦 Täglich", "🌤 Halbschatten", "🌺 Hortensie", "✅ Ja", "🌱 Frühjahr"],
-      ["🌼 Jasmin (echter)", "💧💧 2x/Woche", "🌤 Halbschatten", "♻ Universal", "⚠️ Mäßig", "🌱 Frühjahr"],
-      ["🌱 Minze", "💦 Jeden 2. Tag", "🌤 Halbschatten", "🍋 Mediterran", "✅ Ja", "🔁 Regelm."],
-      ["🌿 Muskatellersalbei", "💧💧 2x/Woche", "☀️ Sonne", "🍋 Mediterran", "⚠️ Mäßig", "🍂 Herbst"],
-      ["🍑 Nektarinenbaum", "💧💧 2x/Woche", "☀️ Sonne", "🍑 Obst", "❌ Nein", "❄️ Winter"],
-      ["🌸 Oleander", "💧💧 2x/Woche", "☀️ Sonne", "🍋 Mediterran", "❌ Nein", "🔪 Nach Bedarf"],
-      ["🌿 Olivenbaum", "💧💧 2x/Woche", "☀️ Sonne", "🍋 Mediterran", "❌ Nein", "🌱 Frühjahr"],
-      ["🌾 Pampasgras", "💧💧 2x/Woche", "☀️ Sonne", "♻ Universal", "✅ Ja", "🌱 Frühjahr"],
-      ["🌹 Rose", "💧💧 2x/Woche", "☀️ Sonne", "♻ Universal", "✅ Ja", "🌱 Frühjahr"],
-      ["🌿 Rosmarin", "💧💧 2x/Woche", "☀️ Sonne", "🍋 Mediterran", "⚠️ Mäßig", "🌱 Frühjahr"],
-      ["🌱 Schnittlauch", "💦 Jeden 2. Tag", "☀️ Sonne", "🍋 Mediterran", "✅ Ja", "🔁 Regelm."],
-      ["🌼 Sternjasmin", "💧💧 2x/Woche", "🌤 Halbschatten", "♻ Universal", "⚠️ Mäßig", "🌱 Frühjahr"],
-      ["🍇 Weinrebe", "💧💧 2x/Woche", "☀️ Sonne", "🍑 Obst", "✅ Ja", "🔪 Nach Bedarf"],
-      ["🍋 Zitrone", "💧💧 2x/Woche", "☀️ Sonne", "🍋 Mediterran", "❌ Nein", "🌱 Frühjahr"]
+    let currentCategory = 0;
+    let currentDir = 1;
+
+    const plants = [
+      ["Avocado", "💧💧 2x/Woche", "🌤 Halbschatten", "♻ Universal", "❄️ Nein", "✂️ Regelmäßig"],
+      ["Basilikum", "💦💦 Täglich", "🌤 Halbschatten", "🍋 Mediterran", "❄️ Nein", "✂️ Regelmäßig"],
+      ["Calamondinorange", "💧💧 2x/Woche", "☀️ Sonne", "🍋 Mediterran", "❄️ Nein", "✂️ Frühjahr"],
+      ["Echter Lavendel", "💧 1x/Woche", "☀️ Sonne", "🍋 Mediterran", "❄️ Mäßig", "✂️ Nach Bedarf"],
+      ["Eukalyptus", "💧💧 2x/Woche", "☀️ Sonne", "🍋 Mediterran", "❄️ Nein", "✂️ Frühjahr"],
+      ["Feige", "💧💧 2x/Woche", "☀️ Sonne", "🍑 Obst", "❄️ Mäßig", "✂️ Nach Bedarf"],
+      ["Goldahorn", "💧💧 2x/Woche", "🌤 Halbschatten", "♻ Universal", "❄️ Ja", "✂️ Nach Bedarf"],
+      ["Harlekin Weide", "💧💧 2x/Woche", "🌤 Halbschatten", "♻ Universal", "❄️ Ja", "✂️ Frühjahr"],
+      ["Hibiskus", "💧💧 2x/Woche", "🌤 Halbschatten", "♻ Universal", "❄️ Nein", "✂️ Frühjahr"],
+      ["Hortensien", "💦💦 Täglich", "🌤 Halbschatten", "🌺 Hortensie", "❄️ Ja", "✂️ Frühjahr"],
+      ["Jasmin (echter)", "💧💧 2x/Woche", "🌤 Halbschatten", "♻ Universal", "❄️ Mäßig", "✂️ Frühjahr"],
+      ["Minze", "💦 Jeden 2. Tag", "🌤 Halbschatten", "🍋 Mediterran", "❄️ Ja", "✂️ Regelmäßig"],
+      ["Muskatellersalbei", "💧💧 2x/Woche", "☀️ Sonne", "🍋 Mediterran", "❄️ Mäßig", "✂️ Herbst"],
+      ["Nektarinenbaum", "💧💧 2x/Woche", "☀️ Sonne", "🍑 Obst", "❄️ Nein", "✂️ Winter"],
+      ["Oleander", "💧💧 2x/Woche", "☀️ Sonne", "🍋 Mediterran", "❄️ Nein", "✂️ Nach Bedarf"],
+      ["Olivenbaum", "💧💧 2x/Woche", "☀️ Sonne", "🍋 Mediterran", "❄️ Nein", "✂️ Frühjahr"],
+      ["Pampasgras", "💧💧 2x/Woche", "☀️ Sonne", "♻ Universal", "❄️ Ja", "✂️ Frühjahr"],
+      ["Rose", "💧💧 2x/Woche", "☀️ Sonne", "♻ Universal", "❄️ Ja", "✂️ Frühjahr"],
+      ["Rosmarin", "💧💧 2x/Woche", "☀️ Sonne", "🍋 Mediterran", "❄️ Mäßig", "✂️ Frühjahr"],
+      ["Schnittlauch", "💦 Jeden 2. Tag", "☀️ Sonne", "🍋 Mediterran", "❄️ Ja", "✂️ Regelmäßig"],
+      ["Sternjasmin", "💧💧 2x/Woche", "🌤 Halbschatten", "♻ Universal", "❄️ Mäßig", "✂️ Frühjahr"],
+      ["Weinrebe", "💧💧 2x/Woche", "☀️ Sonne", "🍑 Obst", "❄️ Ja", "✂️ Nach Bedarf"],
+      ["Zitrone", "💧💧 2x/Woche", "☀️ Sonne", "🍋 Mediterran", "❄️ Nein", "✂️ Frühjahr"]
     ];
 
-    const tbody = document.querySelector("#pflanzenTable tbody");
-    const table = document.getElementById("pflanzenTable");
+    const container = document.getElementById("plantCards");
 
-    function applyColor(cell, columnIndex) {
-      const text = cell.textContent;
-      if (columnIndex === 1) {
-        if (text.includes("Täglich")) cell.className = "water-high";
-        else if (text.includes("Jeden 2")) cell.className = "water-medium";
-        else cell.className = "water-low";
-      } else if (columnIndex === 2) {
-        cell.className = text.includes("Halbschatten") ? "light-half" : "light-sun";
-      } else if (columnIndex === 3) {
-        if (text.includes("Universal")) cell.className = "fertilizer-universal";
-        else if (text.includes("Mediterran")) cell.className = "fertilizer-mediterranean";
-        else if (text.includes("Obst")) cell.className = "fertilizer-obst";
-        else if (text.includes("Hortensie")) cell.className = "fertilizer-hortensie";
-      } else if (columnIndex === 4) {
-        if (text.includes("Ja")) cell.className = "winter-yes";
-        else if (text.includes("Nein")) cell.className = "winter-no";
-        else cell.className = "winter-moderate";
-      } else if (columnIndex === 5) {
-        if (text.includes("Regelm")) cell.className = "cut-regular";
-        else if (text.includes("Frühjahr")) cell.className = "cut-spring";
-        else if (text.includes("Herbst")) cell.className = "cut-autumn";
-        else if (text.includes("Winter")) cell.className = "cut-winter";
-        else cell.className = "cut-need";
+    function renderCards() {
+      container.innerHTML = "";
+      plants.forEach(([name, ...details]) => {
+        const div = document.createElement("div");
+        div.className = "card";
+        const filename = name.replace(/ /g, "_").replace(/[()]/g, "_").replace(/[^\wäöüÄÖÜß_]/g, "");
+        div.style.backgroundImage = `url('${filename}.png')`;
+
+        const attributesHTML = currentCategory === 0
+          ? details.map(d => `<div class="plant-attribute">${d}</div>`).join("")
+          : `<div class="plant-attribute">${details[currentCategory - 1]}</div>`;
+
+        div.innerHTML = `<div class="text-overlay">
+            <div class="plant-name">${name}</div>
+            ${attributesHTML}
+          </div>`;
+        container.appendChild(div);
+      });
+    }
+
+    function toggleSort(index) {
+      if (currentCategory === index) currentDir *= -1;
+      else currentDir = 1;
+      currentCategory = index;
+
+      const customOrders = {
+        1: ["💦💦 Täglich", "💦 Jeden 2. Tag", "💧💧 2x/Woche", "💧 1x/Woche"],
+        2: ["☀️ Sonne", "🌤 Halbschatten"],
+        3: ["🍋 Mediterran", "♻ Universal", "🍑 Obst", "🌺 Hortensie"],
+        4: ["❄️ Ja", "❄️ Mäßig", "❄️ Nein"],
+        5: ["✂️ Regelmäßig", "✂️ Frühjahr", "✂️ Herbst", "✂️ Winter", "✂️ Nach Bedarf"]
+      };
+
+      if (customOrders[index]) {
+        const order = customOrders[index];
+        plants.sort((a, b) => {
+          const valA = order.indexOf(a[index]) !== -1 ? order.indexOf(a[index]) : 99;
+          const valB = order.indexOf(b[index]) !== -1 ? order.indexOf(b[index]) : 99;
+          return currentDir * (valA - valB);
+        });
+      } else {
+        plants.sort((a, b) => {
+          const aText = a[0].replace(/[^a-zA-ZäöüÄÖÜß]/g, '').toLowerCase();
+          const bText = b[0].replace(/[^a-zA-ZäöüÄÖÜß]/g, '').toLowerCase();
+          return currentDir * aText.localeCompare(bText);
+        });
       }
+
+      renderCards();
     }
 
-    data.forEach(row => {
-      const tr = document.createElement("tr");
-      row.forEach((val, i) => {
-        const td = document.createElement("td");
-        td.textContent = val;
-        applyColor(td, i);
-        tr.appendChild(td);
-      });
-      tbody.appendChild(tr);
-    });
-
-    function sortTable(col) {
-      const rows = Array.from(tbody.querySelectorAll("tr"));
-      const dir = table.dataset.sortDir === "asc" ? "desc" : "asc";
-      table.dataset.sortDir = dir;
-      table.dataset.sortCol = col;
-
-      rows.sort((a, b) => {
-        const A = a.children[col].textContent;
-        const B = b.children[col].textContent;
-
-        if (col === 1) {
-          const order = [
-            "💦💦 Täglich",
-            "💦 Jeden 2. Tag",
-            "💧💧 2x/Woche",
-            "💧 1x/Woche"
-          ];
-          const valA = order.indexOf(A);
-          const valB = order.indexOf(B);
-          return dir === "asc" ? valA - valB : valB - valA;
-        }
-
-        const cleanA = A.replace(/[^a-zA-ZäöüÄÖÜß]/g, '').toLowerCase();
-        const cleanB = B.replace(/[^a-zA-ZäöüÄÖÜß]/g, '').toLowerCase();
-        return dir === "asc" ? cleanA.localeCompare(cleanB) : cleanB.localeCompare(cleanA);
-      });
-
-      tbody.innerHTML = "";
-      rows.forEach(r => tbody.appendChild(r));
-
-      table.querySelectorAll("th").forEach((th, i) => {
-        th.classList.remove("sorted-asc", "sorted-desc");
-        if (i === col) th.classList.add(dir === "asc" ? "sorted-asc" : "sorted-desc");
-      });
-    }
+    renderCards();
   </script>
 </body>
 </html>
